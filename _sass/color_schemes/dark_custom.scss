@@ -1,0 +1,11 @@
+@import "./color_schemes/dark";
+
+$blue-000: #008eb1;
+$grey-dk-300: #131416;
+$grey-lt-000: #c2c3c4;
+
+$link-color: $blue-000;
+$body-background-color: $grey-dk-300;
+$nav-child-link-color: $grey-lt-000;
+$sidebar-color: $grey-dk-300;
+$feedback-color: darken($sidebar-color, 3%);

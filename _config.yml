@@ -1,8 +1,31 @@
-title: Just the Docs Template
-description: A starter template for a Jeykll site using the Just the Docs theme!
+title: gem5in5
+description: A self-paced online gem5 course!
 theme: just-the-docs
 
 url: https://just-the-docs.github.io
 
 aux_links:
-  Template Repository: https://github.com/just-the-docs/just-the-docs-template
+  gem5 Official Website: https://www.gem5.org/
+  gem5 GitHub Repository: https://github.com/gem5/gem5
+  gem5 Resources: https://resources.gem5.org/
+
+aux_links_new_tab: true
+
+favicon_ico: /assets/favicon/favicon.ico
+
+logo: /assets/gem5in5_darkmode.png
+
+search_enabled: false
+
+color_scheme: dark_custom
+
+markdown: kramdown
+kramdown:
+  parse_block_html: true
+
+footer_content: "This course is a work in progress!"
+
+callouts:
+  construction:
+    title: Under Construction!
+    color: red
