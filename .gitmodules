@@ -1,3 +1,4 @@
 [submodule "learn-you-a-gem5"]
 	path = _includes
 	url = https://github.com/naamaamiel/learn-you-a-gem5
+	branch = main
