@@ -142,7 +142,7 @@ for root, dirs, files in os.walk("_includes/workspace"):
           section_dir_name = unit_num(section_dir_name) # I hate unit 4
           curr_section_dir = section_dir_name
           parent_web_names[path] = track_titles[section_dir_name]
-          continue
+
       filepath = f"{curr_web_root}/{curr_section_dir}"
       workspace_title = f"{section_dir_name} Workspace"
       parent_web_names[path] = workspace_title
@@ -150,22 +150,25 @@ for root, dirs, files in os.walk("_includes/workspace"):
       if not os.path.exists(filepath):
         os.mkdir(filepath)
         print(f"Made section directory: {filepath}")
-      # Make the table-of-contents "workspace" page
-      toc_path = f"{filepath}/00-workspace.md"
-      if not os.path.exists(toc_path):
-        # Make front matter
-        front_matter = ("---\n"
-                        f"title: \"{workspace_title}\"\n"
-                        f"parent: \"{sections[section_dir_name]}\"\n"
-                        f"layout: default\n"
-                        f"nav_order: 1\n"
-                        "---\n"
-                        ""
-        )
-        # Make and write to the file
-        with open(toc_path, 'w', encoding="utf-8") as toc_file:
-          toc_file.write(front_matter)
-        print(f"Made workspace table-of-contents file for {toc_path}")
+
+      if not (path_length == 3 and unit_num(curr_unit_dir) == "04"):
+        # Make the table-of-contents "workspace" page
+        toc_path = f"{filepath}/00-workspace.md"
+        if not os.path.exists(toc_path):
+          # Make front matter
+          front_matter = ("---\n"
+                          f"title: \"{workspace_title}\"\n"
+                          f"parent: \"{sections[section_dir_name]}\"\n"
+                          f"layout: default\n"
+                          f"nav_order: 1\n"
+                          "---\n"
+                          ""
+          )
+          # Make and write to the file
+          with open(toc_path, 'w', encoding="utf-8") as toc_file:
+            toc_file.write(front_matter)
+          print(f"Made workspace table-of-contents file for {toc_path}")
+
     else:
       filepath = f"{curr_web_root}/{curr_section_dir}"
       file_name = work_name_to_web_name(path_name, unit_num(curr_unit_dir))
@@ -214,51 +217,51 @@ for root, dirs, files in os.walk("_includes/workspace"):
   #
   count = 0
   for file in files:
-    if (file == "NAVIGATION.md" or (file != "Makefile" and file.rfind('.') == -1)):
-      continue
-    # Build the front matter
-    filename = work_name_to_web_name(file, unit_num(curr_unit_dir))
-    if parent_web_names.__contains__(path):
-      parent_web_name = parent_web_names[path]
-    else:
-      parent_web_name = parent_name
-    
-    front_matter = ("---\n"
-                    f"title: \"{file}\"\n"
-                    f"parent: \"{parent_web_name}\"\n"
-                    f"layout: default\n"
-                    f"nav_order: {count}\n"
-                    "---\n"
-                    ""
-    )
-    # Build the contents
-    syntax = "txt"
-    if file == "Makefile":
-      syntax = "make"
-    else:
-      ext = file[file.rfind('.'):]
+    print(file)
+    dot = file.rfind('.')
+    if not ((file == "NAVIGATION.md") or 
+            (file != "Makefile" and dot == -1) or 
+            (file[dot:] == ".bib") or 
+            (file[dot:] == ".gz") or 
+            (file[dot:] == ".dtb")):
+      # Build the front matter
+      filename = work_name_to_web_name(file, unit_num(curr_unit_dir))
+      if parent_web_names.__contains__(path):
+        parent_web_name = parent_web_names[path]
+      else:
+        parent_web_name = parent_name
+      
+      front_matter = ("---\n"
+                      f"title: \"{file}\"\n"
+                      f"parent: \"{parent_web_name}\"\n"
+                      f"layout: default\n"
+                      f"nav_order: {count}\n"
+                      "---\n"
+                      ""
+      )
+      # Build the contents
+      syntax = "txt"
+      if file == "Makefile":
+        syntax = "make"
+      else:
+        ext = file[file.rfind('.'):]
+        if syntax_highlights.__contains__(ext):
+          syntax = syntax_highlights[ext]
 
-      if ext == ".bib" or ext == ".dtb" or ext == ".gz":
-        print("unsupported file (.bib, .dtb, or .gz). Skipping...")
-        continue
+      contents = (f"```{syntax}\n"
+        f"{{% include {root.removeprefix('_includes/')}/{file} %}}\n"
+        "```\n"
+      )
+      count += 1
 
-      if syntax_highlights.__contains__(ext):
-        syntax = syntax_highlights[ext]
-
-    contents = (f"```{syntax}\n"
-      f"{{% include {root.removeprefix('_includes/')}/{file} %}}\n"
-      "```\n"
-    )
-    count += 1
-
-    # Make and write to the file
-    file_path = f"{curr_web_root}/{curr_section_dir}/{filename}"
-    if not os.path.exists(file_path):
       # Make and write to the file
-      with open(file_path, 'w', encoding="utf-8") as code_file:
-        code_file.write(f"{front_matter}{contents}")
-      print(f"Made code file for {file_path}")
-    
+      file_path = f"{curr_web_root}/{curr_section_dir}/{filename}"
+      if not os.path.exists(file_path):
+        # Make and write to the file
+        with open(file_path, 'w', encoding="utf-8") as code_file:
+          code_file.write(f"{front_matter}{contents}")
+        print(f"Made code file for {file_path}")
+      
 
 
   
