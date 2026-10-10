@@ -29,3 +29,5 @@ callouts:
   construction:
     title: Under Construction!
     color: red
+
+enable_copy_code_button: true
