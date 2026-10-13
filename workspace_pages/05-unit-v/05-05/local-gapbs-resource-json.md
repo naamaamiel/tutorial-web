@@ -1,6 +1,8 @@
 ---
 title: "local-gapbs-resource.json"
 parent: "05-05 Workspace"
+grand_parent: "Section 5: Disk images"
+ancestor: "Unit V: Advanced Topics"
 layout: default
 nav_order: 0
 ---

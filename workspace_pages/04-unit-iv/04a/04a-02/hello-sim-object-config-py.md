@@ -1,6 +1,8 @@
 ---
 title: "hello_sim_object_config.py"
 parent: "04a-02 Workspace"
+grand_parent: "04a-cpus"
+ancestor: "Section 2: Event-driven simulation"
 layout: default
 nav_order: 0
 ---

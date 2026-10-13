@@ -1,6 +1,8 @@
 ---
 title: "branch_pred_processor.py"
 parent: "04a-05 Workspace"
+grand_parent: "04a-cpus"
+ancestor: "Section 5: Branch predictors"
 layout: default
 nav_order: 0
 ---

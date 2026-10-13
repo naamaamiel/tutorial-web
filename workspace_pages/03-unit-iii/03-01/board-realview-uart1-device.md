@@ -1,9 +1,0 @@
----
-title: "board.realview.uart1.device"
-parent: "FS_mode"
-layout: default
-nav_order: 6
----
-```txt
-{% include workspace/03-intermediate-features/01-simulation-modes/completed/FS_mode/board.realview.uart1.device %}
-```

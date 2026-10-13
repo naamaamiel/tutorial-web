@@ -1,6 +1,8 @@
 ---
 title: "my_processors.py"
 parent: "02-02 Workspace"
+grand_parent: "Section 2: Processors"
+ancestor: "Unit II: Beginning Simulation"
 layout: default
 nav_order: 0
 ---

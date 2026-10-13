@@ -1,6 +1,8 @@
 ---
 title: "hello_world.py"
 parent: "01-04 Workspace"
+grand_parent: "Section 4: Your First configuration script"
+ancestor: "Unit I: Introduction"
 layout: default
 nav_order: 0
 ---

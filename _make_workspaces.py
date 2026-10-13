@@ -56,10 +56,37 @@ def convert_to_roman(num):
 def unit_num(name):
    return name[0:name.find('-')]
 
+def work_path_to_web_path(work_path):
+  web_path = ""
+  count = 0
+  unit = ""
+  for step in work_path.split('/'):
+    match count:
+      case 0:
+        pass
+      case 1:
+        web_path = web_path + f"{step}_pages"
+      case 2:
+        web_path =  web_path + "/" + work_name_to_web_name(step, "")
+        unit = unit_num(step)
+      case 3:
+        if unit != "04":
+          web_path = web_path + "/" + unit + "-" + unit_num(step)
+        else:
+          web_path =  web_path + "/" + unit_num(step) + "/" + unit_num(step) + "-"
+          count = -2
+      case -1:
+        web_path = web_path + unit_num(step)
+        count = 4
+      case _:
+        web_path = web_path + "/" + step
+    count += 1
+  return web_path
+
 unit_titles = ["Unit I: Introduction", "Unit II: Beginning Simulation", "Unit III: Intermediate Features", "Unit IV: Developing gem5 Models", "Unit V: Advanced Topics"]
-track_titles = {"04a": "Track 1: Processors", 
-                "04b": "Track 2: Caches", 
-                "04c": "Track 3: Memory"}
+track_titles = {"04a": "Unit IV: Processors Track", 
+                "04b": "Unit IV: Caches Track", 
+                "04c": "Unit IV: Memory Track"}
 sections = {"01-01" : "Section 1: Why simulation?",
             "01-02" : "Section 2: Enter gem5",
             "01-03" : "Section 3: Installing gem5",
@@ -168,13 +195,27 @@ for root, dirs, files in os.walk("_includes/workspace"):
           with open(toc_path, 'w', encoding="utf-8") as toc_file:
             toc_file.write(front_matter)
           print(f"Made workspace table-of-contents file for {toc_path}")
-
     else:
-      filepath = f"{curr_web_root}/{curr_section_dir}"
-      file_name = work_name_to_web_name(path_name, unit_num(curr_unit_dir))
       # The wild west of subdirectories!
+
+      # Make the directory
+      filepath = f"{curr_web_root}/{curr_section_dir}"
+      work_path = root
+      depth = filepath.count('/') + 2 # get rid of _includes/workspace
+      while depth > 0:
+        work_path = work_path[work_path.find('/')+1:]
+        depth -= 1
+
+      full_dir_path = f"{filepath}/{work_path}"
+
+      if not os.path.exists(full_dir_path):
+        os.mkdir(full_dir_path)
+        print(f"Made subdirectory: {full_dir_path}")
+
+      # Make the table of contents
       # One special case: are we looking right at the "completed" directory?
       # If so, it has a different parent in the front matter and needs to be handled separately
+      file_name = work_name_to_web_name(path_name, unit_num(curr_unit_dir))
       if (file_name == "completed"):
         file_title = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
         parent_web_names[path] = file_title
@@ -182,12 +223,13 @@ for root, dirs, files in os.walk("_includes/workspace"):
         front_matter = ("---\n"
                 f"title: \"{file_title}\"\n"
                 f"parent: \"{sections[filepath[filepath.rfind('/') + 1:]]}\"\n"
+                f"ancestor: \"{sections[curr_section_dir[curr_section_dir.find('/') + 1 :]]}\"\n"
                 f"layout: default\n"
                 f"nav_order: 2\n"
                 "---\n"
                 ""
         )
-        file_path = f"{filepath}/00-completed.md"
+        file_path = f"{full_dir_path}/00-completed.md"
         if not os.path.exists(file_path):
           # Make and write to the file
           with open(file_path, 'w', encoding="utf-8") as comp_file:
@@ -197,15 +239,25 @@ for root, dirs, files in os.walk("_includes/workspace"):
       else:
         parent_web_names[path] = path_name
         # Create front matter
+        grandparent = parent.parent.name
+        ancestor = sections[curr_section_dir[curr_section_dir.find('/') + 1 :]]
+        if grandparent not in full_dir_path:
+          grandparent = ancestor
+        if grandparent == "completed":
+          grandparent = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
+        elif "completed" in full_dir_path:
+          ancestor = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
         front_matter = ("---\n"
                 f"title: \"{path_name}\"\n"
                 f"parent: \"{parent_web_names[parent]}\"\n"
+                f"grand_parent: \"{grandparent}\"\n"
+                f"ancestor: \"{ancestor}\"\n"
                 f"layout: default\n"
                 f"nav_order: 2\n"
                 "---\n"
                 ""
         )
-        file_path = f"{filepath}/{file_name}"
+        file_path = f"{full_dir_path}/{file_name}"
         if not os.path.exists(file_path):
           # Make and write to the file
           with open(file_path, 'w', encoding="utf-8") as sub_file:
@@ -215,9 +267,11 @@ for root, dirs, files in os.walk("_includes/workspace"):
   #
   # FILE HANDLING
   #
+  # Path time (yes I know this is duplicated. I'm sorry)
+  full_dir_path = work_path_to_web_path(root)
+
   count = 0
   for file in files:
-    print(file)
     dot = file.rfind('.')
     if not ((file == "NAVIGATION.md") or 
             (file != "Makefile" and dot == -1) or 
@@ -225,15 +279,60 @@ for root, dirs, files in os.walk("_includes/workspace"):
             (file[dot:] == ".gz") or 
             (file[dot:] == ".dtb")):
       # Build the front matter
+
       filename = work_name_to_web_name(file, unit_num(curr_unit_dir))
       if parent_web_names.__contains__(path):
         parent_web_name = parent_web_names[path]
       else:
         parent_web_name = parent_name
+
+      # Parentage (I once again apologize for copied code)
+      grandparent = parent.name
+      ancestor = sections[curr_section_dir[curr_section_dir.find('/') + 1 :]]
+
+      path_count = full_dir_path.count('/')
+      if f"/{grandparent}/" not in full_dir_path:
+        if "completed" not in full_dir_path: path_count += 1
+        if path_count <= 3:
+          grandparent = ancestor
+          ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
+        elif path_count == 4:
+          if "completed" in full_dir_path:
+            grandparent = ancestor
+            ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
+            if unit_num(curr_unit_dir) == "04": # tracks special case
+              ancestor = track_titles[unit_num(curr_section_dir[curr_section_dir.find('/') + 1:])]
+        else:
+          grandparent = ancestor
+          ancestor = track_titles[unit_num(curr_section_dir[curr_section_dir.find('/') + 1:])]
+      else:
+        if grandparent == "completed":
+          grandparent = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
+
+      print(path_count)
+      print(grandparent)
+      print(ancestor)
+      print()
+        # if "completed/" in full_dir_path:
+        #   grandparent = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
+        # elif unit_num(curr_section_dir)[0:2] == "04":
+        #   if ((full_dir_path.count('/') == 4 and "completed" in full_dir_path) or 
+        #       (full_dir_path.count('/') == 3 and "completed" not in full_dir_path)):
+        #     grandparent = ancestor
+        #     ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
+        #   else:
+        #     print(f"UNIT 4 SPECIAL EXCEPTION TRIGGERED FOR FILENAME {full_dir_path}/{file}")
+        #     grandparent = parent_web_names[parent]
+        #     ancestor = track_titles[unit_num(curr_section_dir[curr_section_dir.find('/') + 1:])]
+        # else:
+        #   grandparent = ancestor
+        #   ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
       
       front_matter = ("---\n"
                       f"title: \"{file}\"\n"
                       f"parent: \"{parent_web_name}\"\n"
+                      f"grand_parent: \"{grandparent}\"\n"
+                      f"ancestor: \"{ancestor}\"\n"
                       f"layout: default\n"
                       f"nav_order: {count}\n"
                       "---\n"
@@ -255,7 +354,7 @@ for root, dirs, files in os.walk("_includes/workspace"):
       count += 1
 
       # Make and write to the file
-      file_path = f"{curr_web_root}/{curr_section_dir}/{filename}"
+      file_path = f"{full_dir_path}/{filename}"
       if not os.path.exists(file_path):
         # Make and write to the file
         with open(file_path, 'w', encoding="utf-8") as code_file:

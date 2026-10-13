@@ -1,6 +1,8 @@
 ---
 title: "inst_trace.py"
 parent: "04a-06 Workspace"
+grand_parent: "04a-cpus"
+ancestor: "Section 6: ISAs"
 layout: default
 nav_order: 0
 ---
