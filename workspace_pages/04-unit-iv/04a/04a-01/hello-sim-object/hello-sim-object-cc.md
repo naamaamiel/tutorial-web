@@ -1,7 +1,7 @@
 ---
 title: "hello_sim_object.cc"
 parent: "hello-sim-object"
-grand_parent: "Section 1: SimObjects"
+grand_parent: "04a-01 Workspace"
 ancestor: "Unit IV: Processors Track"
 layout: default
 nav_order: 0
