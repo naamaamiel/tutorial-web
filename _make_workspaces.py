@@ -11,8 +11,8 @@ def work_name_to_web_name(work_name, unit):
 
   if first_hyphen != 2:
     # completed folder -> completed folder
-    if work_name == "complete" or work_name == "completed":
-      return("completed")
+    if work_name == "completed":
+      return "completed"
     # code file -> code file OR m5out dir -> m5out dir OR intermediate dir -> intermediate dir
     else:
       no_under = work_name.replace("_", "-")
@@ -31,13 +31,6 @@ def work_name_to_web_name(work_name, unit):
       # section folder -> section folder
       return unit + '-' + front_num
 
-# Helper: find prefix
-def web_has_unit(web_dirs, dir_num):
-  for dir in web_dirs:
-    if dir[0:dir.find('-')] == dir_num:
-      return True
-  return False
-
 # Helper: convert to roman numeral
 # being lazy for now with a map; I *doubt* we'll have more than 10 units
 def convert_to_roman(num):
@@ -53,9 +46,11 @@ def convert_to_roman(num):
          10 : "x"}
   return map[num]
 
+# Helper: grab the unit number (or whatever is before the first hyphen) from a name
 def unit_num(name):
    return name[0:name.find('-')]
 
+# Helper: convert a workspace directory path to its corresponding web directory path
 def work_path_to_web_path(work_path):
   web_path = ""
   count = 0
@@ -74,8 +69,8 @@ def work_path_to_web_path(work_path):
           web_path = web_path + "/" + unit + "-" + unit_num(step)
         else:
           web_path =  web_path + "/" + unit_num(step) + "/" + unit_num(step) + "-"
-          count = -2
-      case -1:
+          count = -2 # Weird hack for Unit IV (sigh)
+      case -1: # Weird hack, continued
         web_path = web_path + unit_num(step)
         count = 4
       case _:
@@ -83,6 +78,7 @@ def work_path_to_web_path(work_path):
     count += 1
   return web_path
 
+# Titles for webpages (otherwise cannot be determined by file name)
 unit_titles = ["Unit I: Introduction", "Unit II: Beginning Simulation", "Unit III: Intermediate Features", "Unit IV: Developing gem5 Models", "Unit V: Advanced Topics"]
 track_titles = {"04a": "Unit IV: Processors Track", 
                 "04b": "Unit IV: Caches Track", 
@@ -90,7 +86,7 @@ track_titles = {"04a": "Unit IV: Processors Track",
 sections = {"01-01" : "Section 1: Why simulation?",
             "01-02" : "Section 2: Enter gem5",
             "01-03" : "Section 3: Installing gem5",
-            "01-04" : "Section 4: Your First configuration script",
+            "01-04" : "Section 4: Your first configuration script",
             "02-01" : "Section 1: The gem5 standard library and resources",
             "02-02" : "Section 2: Processors",
             "02-03" : "Section 3: Caches",
@@ -113,6 +109,7 @@ sections = {"01-01" : "Section 1: Why simulation?",
             "05-06" : "Section 6: Power modeling",
 }
 
+# Convert file extension to corresponding markdown syntax highlight keyword
 syntax_highlights = {".py" : "python",
                      ".cc" : "cpp",
                      ".c" : "c",
@@ -267,100 +264,94 @@ for root, dirs, files in os.walk("_includes/workspace"):
   #
   # FILE HANDLING
   #
-  # Path time (yes I know this is duplicated. I'm sorry)
+  # Get the full web path
   full_dir_path = work_path_to_web_path(root)
 
   count = 0
   for file in files:
+
+    # Skip files that don't display correctly
     dot = file.rfind('.')
-    if not ((file == "NAVIGATION.md") or 
-            (file != "Makefile" and dot == -1) or 
-            (file[dot:] == ".bib") or 
-            (file[dot:] == ".gz") or 
-            (file[dot:] == ".dtb")):
-      # Build the front matter
+    if ((file == "NAVIGATION.md") or           
+       (file != "Makefile" and dot == -1) or 
+       (file[dot:] == ".bib") or 
+       (file[dot:] == ".gz") or 
+       (file[dot:] == ".dtb")):
+      continue
 
-      filename = work_name_to_web_name(file, unit_num(curr_unit_dir))
-      if parent_web_names.__contains__(path):
-        parent_web_name = parent_web_names[path]
-      else:
-        parent_web_name = parent_name
+    # Prepare to make the front matter
 
-      # Parentage (I once again apologize for copied code)
-      grandparent = parent.name
-      ancestor = sections[curr_section_dir[curr_section_dir.find('/') + 1 :]]
+    # Determine the correct parent
+    filename = work_name_to_web_name(file, unit_num(curr_unit_dir))
+    if parent_web_names.__contains__(path):
+      parent_web_name = parent_web_names[path]
+    else:
+      parent_web_name = parent_name
 
-      path_count = full_dir_path.count('/')
-      if f"/{grandparent}/" not in full_dir_path:
-        if "completed" not in full_dir_path: path_count += 1
-        if path_count <= 3:
-          grandparent = ancestor
-          ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
-        elif path_count == 4:
-          if "completed" in full_dir_path:
-            grandparent = ancestor
-            ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
-            if unit_num(curr_unit_dir) == "04": # tracks special case
-              ancestor = track_titles[unit_num(curr_section_dir[curr_section_dir.find('/') + 1:])]
-        else:
-          grandparent = ancestor
-          ancestor = track_titles[unit_num(curr_section_dir[curr_section_dir.find('/') + 1:])]
-      else:
-        if grandparent == "completed":
-          grandparent = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
+    # Determine the correct grandparent
+    # Also determine great-grandparent to put in "ancestor" field
+    web_path = pathlib.Path(full_dir_path)
 
-      print(path_count)
-      print(grandparent)
-      print(ancestor)
-      print()
-        # if "completed/" in full_dir_path:
-        #   grandparent = f"{curr_section_dir[curr_section_dir.find('/') + 1 :]} Completed Files"
-        # elif unit_num(curr_section_dir)[0:2] == "04":
-        #   if ((full_dir_path.count('/') == 4 and "completed" in full_dir_path) or 
-        #       (full_dir_path.count('/') == 3 and "completed" not in full_dir_path)):
-        #     grandparent = ancestor
-        #     ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
-        #   else:
-        #     print(f"UNIT 4 SPECIAL EXCEPTION TRIGGERED FOR FILENAME {full_dir_path}/{file}")
-        #     grandparent = parent_web_names[parent]
-        #     ancestor = track_titles[unit_num(curr_section_dir[curr_section_dir.find('/') + 1:])]
-        # else:
-        #   grandparent = ancestor
-        #   ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
-      
-      front_matter = ("---\n"
-                      f"title: \"{file}\"\n"
-                      f"parent: \"{parent_web_name}\"\n"
-                      f"grand_parent: \"{grandparent}\"\n"
-                      f"ancestor: \"{ancestor}\"\n"
-                      f"layout: default\n"
-                      f"nav_order: {count}\n"
-                      "---\n"
-                      ""
-      )
-      # Build the contents
-      syntax = "txt"
-      if file == "Makefile":
-        syntax = "make"
-      else:
-        ext = file[file.rfind('.'):]
-        if syntax_highlights.__contains__(ext):
-          syntax = syntax_highlights[ext]
+    grandparent_work_dir = web_path.parent
+    grandparent_name = grandparent_work_dir.name
+    grandparent = grandparent_name
 
-      contents = (f"```{syntax}\n"
-        f"{{% include {root.removeprefix('_includes/')}/{file} %}}\n"
-        "```\n"
-      )
-      count += 1
+    great_work_dir = grandparent_work_dir.parent
+    ancestor_name = great_work_dir.name
+    ancestor = ancestor_name
 
+    if grandparent_name in sections:                      # files directly in the "workspace" directory
+       grandparent = f"{grandparent_name} Workspace"           # grandparent is just the workspace page
+       ancestor = sections[grandparent_name]                   # great-grandparent is then just the section page
+    elif grandparent_name == "completed":                 # files under the "completed" directory
+      grandparent = f"{ancestor_name} Completed Files"         # grandparent is just the completed files page
+      ancestor = sections[ancestor_name]                       # great-grandparent is then just the section page
+    elif grandparent_name == work_name_to_web_name(curr_unit_dir, ""):  # shallow files with a unit as parent
+      grandparent = sections[web_path.name]                     # grandparent is the section page
+      ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]  # ancestor is the unit page
+    elif grandparent_name == "04a" or grandparent_name == "04b" or grandparent_name == "04c":  # unit 4 exception strikes again
+      grandparent = sections[web_path.name]                     # grandparent is the section page
+      ancestor = track_titles[grandparent_name]                 # ancestor is the track page
+    else:
+      # leave the grandparent alone; it's some subdirectory
+      # check if the ancestor is also some subdirectory or it it's the completed or workspace files
+      if ancestor_name in sections:
+        ancestor = f"{ancestor_name} Workspace"
+      elif ancestor_name == "completed":
+        ancestor = f"{great_work_dir.parent.name} Completed Files"
+      # ancestor page can't be anything else--all files are under either the workspace or the completed directory eventually
+    
+    # Build the front matter
+    front_matter = ("---\n"
+                    f"title: \"{file}\"\n"
+                    f"parent: \"{parent_web_name}\"\n"
+                    f"grand_parent: \"{grandparent}\"\n"
+                    f"ancestor: \"{ancestor}\"\n"
+                    f"layout: default\n"
+                    f"nav_order: {count}\n"
+                    "---\n"
+                    ""
+    )
+    # Build the contents
+    syntax = "txt"
+    if file == "Makefile":
+      syntax = "make"
+    else:
+      ext = file[file.rfind('.'):]
+      if syntax_highlights.__contains__(ext):
+        syntax = syntax_highlights[ext]
+
+    contents = (f"```{syntax}\n"
+      f"\n{{% include {root.removeprefix('_includes/')}/{file} %}}\n"
+      "```\n"
+    )
+    count += 1
+
+    # Make and write to the file
+    file_path = f"{full_dir_path}/{filename}"
+    if not os.path.exists(file_path):
       # Make and write to the file
-      file_path = f"{full_dir_path}/{filename}"
-      if not os.path.exists(file_path):
-        # Make and write to the file
-        with open(file_path, 'w', encoding="utf-8") as code_file:
-          code_file.write(f"{front_matter}{contents}")
-        print(f"Made code file for {file_path}")
-      
-
-
+      with open(file_path, 'w', encoding="utf-8") as code_file:
+        code_file.write(f"{front_matter}{contents}")
+      print(f"Made code file for {file_path}")
   
