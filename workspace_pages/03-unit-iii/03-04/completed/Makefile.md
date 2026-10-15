@@ -1,12 +1,12 @@
 ---
 title: "Makefile"
 parent: "03-04 Completed Files"
-grand_parent: "03-04 Workspace"
-ancestor: "Section 4: Communication from simulation to simulator"
+grand_parent: "Section 4: Communication from simulation to simulator"
+ancestor: "Unit III: Intermediate Features"
 layout: default
-nav_order: 1
+nav_order: 2
 ---
-```make
 
+```make
 {% include workspace/03-intermediate-features/04-communication/completed/Makefile %}
 ```

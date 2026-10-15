@@ -6,7 +6,7 @@ ancestor: "Unit III: Intermediate Features"
 layout: default
 nav_order: 2
 ---
-```python
 
+```python
 {% include workspace/03-intermediate-features/04-communication/run_annotated_workload.py %}
 ```

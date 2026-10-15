@@ -6,7 +6,7 @@ ancestor: "Unit III: Intermediate Features"
 layout: default
 nav_order: 0
 ---
-```python
 
+```python
 {% include workspace/03-intermediate-features/03-traffic-generation/traffic_gen.py %}
 ```

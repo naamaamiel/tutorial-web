@@ -6,7 +6,7 @@ ancestor: "Section 1: Simulation modes"
 layout: default
 nav_order: 0
 ---
-```json
 
+```json
 {% include workspace/03-intermediate-features/01-simulation-modes/completed/FS_mode/config.json %}
 ```

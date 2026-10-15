@@ -1,5 +1,6 @@
 import os
 import pathlib
+import shutil
 
 #
 # A painfully human-written helper script to turn add workspace folder files to the site
@@ -116,7 +117,8 @@ syntax_highlights = {".py" : "python",
                      ".txt" : "txt",
                      ".json" : "json",
                      ".hh" : "cpp",
-                     ".h" : "c"
+                     ".h" : "c",
+                     ".bib" : "bibtex"
                     }
 
 # Crawl workspace files and make missing website files along the way
@@ -270,15 +272,6 @@ for root, dirs, files in os.walk("_includes/workspace"):
   count = 0
   for file in files:
 
-    # Skip files that don't display correctly
-    dot = file.rfind('.')
-    if ((file == "NAVIGATION.md") or           
-       (file != "Makefile" and dot == -1) or 
-       (file[dot:] == ".bib") or 
-       (file[dot:] == ".gz") or 
-       (file[dot:] == ".dtb")):
-      continue
-
     # Prepare to make the front matter
 
     # Determine the correct parent
@@ -300,9 +293,13 @@ for root, dirs, files in os.walk("_includes/workspace"):
     ancestor_name = great_work_dir.name
     ancestor = ancestor_name
 
-    if grandparent_name in sections:                      # files directly in the "workspace" directory
-       grandparent = f"{grandparent_name} Workspace"           # grandparent is just the workspace page
-       ancestor = sections[grandparent_name]                   # great-grandparent is then just the section page
+    if grandparent_name in sections:                      # files one level down from the "workspace" directory
+       if web_path.name == "completed":                           # If completed, these are "shallow" and don't have the workspace as parent
+         grandparent = sections[grandparent_name]
+         ancestor = ancestor = unit_titles[int(unit_num(curr_unit_dir)) - 1]
+       else:
+        grandparent = f"{grandparent_name} Workspace"           # grandparent is just the workspace page
+        ancestor = sections[grandparent_name]                   # great-grandparent is then just the section page
     elif grandparent_name == "completed":                 # files under the "completed" directory
       grandparent = f"{ancestor_name} Completed Files"         # grandparent is just the completed files page
       ancestor = sections[ancestor_name]                       # great-grandparent is then just the section page
@@ -332,19 +329,47 @@ for root, dirs, files in os.walk("_includes/workspace"):
                     "---\n"
                     ""
     )
-    # Build the contents
-    syntax = "txt"
-    if file == "Makefile":
-      syntax = "make"
-    else:
-      ext = file[file.rfind('.'):]
-      if syntax_highlights.__contains__(ext):
-        syntax = syntax_highlights[ext]
 
-    contents = (f"```{syntax}\n"
-      f"\n{{% include {root.removeprefix('_includes/')}/{file} %}}\n"
-      "```\n"
-    )
+    # Build the contents
+    contents = ""
+    # Skip navigation file
+    if (file == "NAVIGATION.md"):
+      continue
+    # These files don't display correctly; make them a download 
+    dot = file.rfind('.')
+    if (((file != "Makefile" and file != "SConscript") and dot == -1) or 
+        (file[dot:] == ".bib") or
+        (file[dot:] == ".gz") or 
+        (file[dot:] == ".dtb")):
+      # Copy the file over to the assets folder (unfortunately, can't just leave it in the includes folder)
+      asset_path = pathlib.Path(f"{full_dir_path}/{file}".replace("workspace_pages", "assets/workspace"))
+      if (not os.path.exists(asset_path)):
+        # Make directory path
+        asset_path.parent.mkdir(parents=True, exist_ok=True)
+        # Copy
+        shutil.copy(src = pathlib.Path(f"{root}/{file}"), dst = asset_path)
+        print(f"Copied asset file for {asset_path}")
+
+      contents = ("\nThis file type does not display properly; you may download it instead: "
+        f"[`{file}`](/{asset_path})\n")
+
+    # Otherwise, display them as a code block
+    else:
+      syntax = "txt"
+      if file == "Makefile":
+        syntax = "make"
+      elif file == "SConscript":
+        syntax = "python"
+      else:
+        ext = file[file.rfind('.'):]
+        if syntax_highlights.__contains__(ext):
+          syntax = syntax_highlights[ext]
+
+      contents = (f"\n```{syntax}"
+        f"\n{{% include {root.removeprefix('_includes/')}/{file} %}}\n"
+        "```\n"
+      )
+
     count += 1
 
     # Make and write to the file

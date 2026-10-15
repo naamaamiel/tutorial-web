@@ -6,7 +6,7 @@ ancestor: "Unit I: Introduction"
 layout: default
 nav_order: 0
 ---
-```python
 
+```python
 {% include workspace/01-introduction/04-first-config-script/hello_world.py %}
 ```

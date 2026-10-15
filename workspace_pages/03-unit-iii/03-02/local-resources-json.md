@@ -6,7 +6,7 @@ ancestor: "Unit III: Intermediate Features"
 layout: default
 nav_order: 3
 ---
-```json
 
+```json
 {% include workspace/03-intermediate-features/02-gem5-resources/local_resources.json %}
 ```

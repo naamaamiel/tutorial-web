@@ -6,7 +6,7 @@ ancestor: "Unit II: Beginning Simulation"
 layout: default
 nav_order: 1
 ---
-```python
 
+```python
 {% include workspace/02-beginning-simulation/04-memory/hello_memory.py %}
 ```

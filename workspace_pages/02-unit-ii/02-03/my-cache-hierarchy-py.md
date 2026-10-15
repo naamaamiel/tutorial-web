@@ -6,7 +6,7 @@ ancestor: "Unit II: Beginning Simulation"
 layout: default
 nav_order: 0
 ---
-```python
 
+```python
 {% include workspace/02-beginning-simulation/03-caches/my_cache_hierarchy.py %}
 ```

@@ -6,7 +6,7 @@ ancestor: "Section 4: Memory"
 layout: default
 nav_order: 0
 ---
-```json
 
+```json
 {% include workspace/02-beginning-simulation/04-memory/completed/hello_memory/config.json %}
 ```

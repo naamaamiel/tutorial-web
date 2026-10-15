@@ -4,9 +4,9 @@ parent: "SE_mode"
 grand_parent: "03-01 Completed Files"
 ancestor: "Section 1: Simulation modes"
 layout: default
-nav_order: 4
+nav_order: 5
 ---
-```txt
 
+```txt
 {% include workspace/03-intermediate-features/01-simulation-modes/completed/SE_mode/simout.txt %}
 ```

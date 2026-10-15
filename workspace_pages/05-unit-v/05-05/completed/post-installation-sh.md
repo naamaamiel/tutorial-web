@@ -1,12 +1,12 @@
 ---
 title: "post-installation.sh"
 parent: "05-05 Completed Files"
-grand_parent: "05-05 Workspace"
-ancestor: "Section 5: Disk images"
+grand_parent: "Section 5: Disk images"
+ancestor: "Unit V: Advanced Topics"
 layout: default
 nav_order: 1
 ---
-```txt
 
+```txt
 {% include workspace/05-advanced-topics/05-disk-images/completed/post-installation.sh %}
 ```

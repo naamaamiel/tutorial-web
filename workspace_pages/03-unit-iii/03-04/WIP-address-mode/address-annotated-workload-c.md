@@ -6,7 +6,7 @@ ancestor: "Section 4: Communication from simulation to simulator"
 layout: default
 nav_order: 0
 ---
-```c
 
+```c
 {% include workspace/03-intermediate-features/04-communication/WIP-address-mode/address_annotated_workload.c %}
 ```

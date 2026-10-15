@@ -6,7 +6,7 @@ ancestor: "Unit IV: Processors Track"
 layout: default
 nav_order: 0
 ---
-```python
 
+```python
 {% include workspace/04-gem5-models/04a-cpus/04-debugging/minor_config.py %}
 ```

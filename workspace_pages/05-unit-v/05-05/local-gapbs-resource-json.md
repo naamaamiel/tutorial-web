@@ -6,7 +6,7 @@ ancestor: "Unit V: Advanced Topics"
 layout: default
 nav_order: 0
 ---
-```json
 
+```json
 {% include workspace/05-advanced-topics/05-disk-images/local-gapbs-resource.json %}
 ```

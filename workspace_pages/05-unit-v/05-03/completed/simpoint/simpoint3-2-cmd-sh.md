@@ -6,7 +6,7 @@ ancestor: "Section 3: Sampled simulation"
 layout: default
 nav_order: 6
 ---
-```txt
 
+```txt
 {% include workspace/05-advanced-topics/03-sampled-simulation/completed/simpoint/simpoint3.2-cmd.sh %}
 ```

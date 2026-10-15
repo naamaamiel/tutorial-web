@@ -6,7 +6,7 @@ ancestor: "Unit V: Advanced Topics"
 layout: default
 nav_order: 1
 ---
-```python
 
+```python
 {% include workspace/05-advanced-topics/02-checkpointing/take_a_checkpoint.py %}
 ```
